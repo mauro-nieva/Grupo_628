@@ -109,6 +109,8 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Ingreso correcto", Toast.LENGTH_LONG).show();
                     Log.i("LOG_LOGIN","Token:"+datosJson.get("token"));
                     //finish();
+                    Intent Int_Linterna=new Intent(LoginActivity.this,LinternaActivity.class);
+                    startActivity(Int_Linterna);
                 }
                 else
                 {

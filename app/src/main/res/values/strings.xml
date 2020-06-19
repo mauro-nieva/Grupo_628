@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Lint</string>
+    <string name="title_activity_linterna">LinternaActivity</string>
 </resources>
