@@ -3,6 +3,8 @@ package com.example.lint;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.Camera;
@@ -21,6 +23,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -29,6 +33,7 @@ public class LinternaActivity extends AppCompatActivity {
     private ImageView boton;
     private ImageView imgInternet;
     private ImageView imgModo;
+    private ImageView imgLog;
     private boolean isAuto=false;
 
     private TextView txtLuminosidad,txtProximidad;
@@ -58,8 +63,11 @@ public class LinternaActivity extends AppCompatActivity {
         boton=(ImageView) findViewById(R.id.imgLinterna);
         imgInternet=(ImageView) findViewById(R.id.imgInternet);
         imgModo=(ImageView) findViewById(R.id.imgModo);
+        imgLog=(ImageView) findViewById(R.id.imgLog);
 
+        boton.setOnClickListener(HandlerCmdLinterna);
         imgModo.setOnClickListener(HandlerCmdModo);
+        imgLog.setOnClickListener(HandlerCmdLog);
 
         //mantener pantalla encendida
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -121,6 +129,58 @@ public class LinternaActivity extends AppCompatActivity {
 
         }
     };
+
+    //------------------------------------------------------------------
+    //Click de encendido y apagado manual de linterna
+    //------------------------------------------------------------------
+    View.OnClickListener HandlerCmdLinterna=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if(isAuto==false)
+            {
+                if(isOn)
+                {
+                    apagaFlash();
+                    escribeLog("ENCENDIDO MANUAL");
+                }
+                else {
+                    enciendeFlash();
+                    escribeLog("APAGADO MANUAL");
+                }
+            }
+
+        }
+    };
+
+    //------------------------------------------------------------------
+    //Click de log
+    //------------------------------------------------------------------
+    View.OnClickListener HandlerCmdLog=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent intent=new Intent(LinternaActivity.this,LogActivity.class);
+            startActivity(intent);
+        }
+    };
+
+    private void escribeLog(String linea)
+    {
+        SharedPreferences preferences=getSharedPreferences("Historial",Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor=preferences.edit();
+
+        String contenido=preferences.getString("log","");
+
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = df.format(c.getTime());
+
+        String agregado=formattedDate+" "+linea+"\n";
+
+        editor.putString("log",contenido+agregado);
+
+        editor.commit();
+    }
 
     public void setBolsillo (Boolean b) {
         enBolsillo=b;
@@ -234,7 +294,7 @@ public class LinternaActivity extends AppCompatActivity {
             float valor=(float)values[0];
 
             //getSupportActionBar().setTitle("Luminosity : " + valor + " lx");
-            txtLuminosidad.setText("Luminosidad: "+valor+" Bolsillo: "+getBolsillo());
+            txtLuminosidad.setText("Luminosidad: "+valor);
 
             //Si la luminosidad es nula, el flash esta apagado y no esta en el bolsillo->enciende
             if(valor==0.0 && isOn==false && getBolsillo()==false)
@@ -291,7 +351,7 @@ public class LinternaActivity extends AppCompatActivity {
 
             float valor=(float)values[0];
 
-            txtProximidad.setText("Proximidad: "+valor+" Bolsillo: "+getBolsillo()+" "+txtLuminosidad.getText().subSequence(13,16));
+            txtProximidad.setText("Proximidad: "+valor);
 
             /*if(valor ==0.0) {
                 // Detected something nearby

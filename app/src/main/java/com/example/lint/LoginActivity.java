@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -16,6 +17,11 @@ import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -42,6 +48,25 @@ public class LoginActivity extends AppCompatActivity {
         btnRegister.setOnClickListener(HandlerCmdRegister);
 
         configurarBroadcastreceiver();
+    }
+
+    private void escribeLog(String linea)
+    {
+        SharedPreferences preferences=getSharedPreferences("Historial",Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor=preferences.edit();
+
+        String contenido=preferences.getString("log","");
+
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = df.format(c.getTime());
+
+        String agregado=formattedDate+" "+linea;
+
+        editor.putString("log",contenido+agregado+"\n");
+
+        editor.commit();
     }
 
     View.OnClickListener HandlerCmdLogin=new View.OnClickListener() {
@@ -108,6 +133,7 @@ public class LoginActivity extends AppCompatActivity {
                 {
                     Toast.makeText(getApplicationContext(), "Ingreso correcto", Toast.LENGTH_LONG).show();
                     Log.i("LOG_LOGIN","Token:"+datosJson.get("token"));
+                    escribeLog("LOGIN");
                     //finish();
                     Intent Int_Linterna=new Intent(LoginActivity.this,LinternaActivity.class);
                     startActivity(Int_Linterna);
